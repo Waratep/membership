@@ -60,11 +60,11 @@ func (g GinServer) CreateMember() gin.HandlerFunc {
 		ID, err := g.useCase.CreateMember(*ctx, m.toMemberEntity())
 		if err != nil {
 			log.Println("Error create member", err)
-
 			g.errorHandle(*ctx, err)
+
 			return
 		} else {
-			ctx.JSON(http.StatusOK, CreateMemberResponse{
+			ctx.JSON(http.StatusCreated, CreateMemberResponse{
 				ID: ID,
 			})
 			return

@@ -26,25 +26,7 @@ type MembershipMember struct {
 }
 
 func (u UseCase) CreateMember(ctx gin.Context, m member.Member) (int64, error) {
-	if m.FirstName == "" {
-		return 0, ErrorFirstNameIsRequire
-	}
-
-	if m.LastName == "" {
-		return 0, ErrorLastNameIsRequire
-	}
-
-	if m.Phone == "" {
-		return 0, ErrorPhoneIsRequire
-	}
-
-	if m.Email == "" {
-		return 0, ErrorEmailIsRequire
-	}
-
-	if m.Address == "" {
-		return 0, ErrorAddressIsRequire
-	}
+	validateRequireFields(m)
 
 	memberByPhone, err := u.memberRepository.GetMemberByPhone(ctx, m.Phone)
 	if err != nil && err != ErrorItemNotFound {
@@ -81,4 +63,28 @@ func (u UseCase) CreateMember(ctx gin.Context, m member.Member) (int64, error) {
 	}
 
 	return memberByEmail.ID, nil
+}
+
+func validateRequireFields(m member.Member) error {
+	if m.FirstName == "" {
+		return ErrorFirstNameIsRequire
+	}
+
+	if m.LastName == "" {
+		return ErrorLastNameIsRequire
+	}
+
+	if m.Phone == "" {
+		return ErrorPhoneIsRequire
+	}
+
+	if m.Email == "" {
+		return ErrorEmailIsRequire
+	}
+
+	if m.Address == "" {
+		return ErrorAddressIsRequire
+	}
+
+	return nil
 }

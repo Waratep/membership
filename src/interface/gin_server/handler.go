@@ -13,6 +13,13 @@ type ErrorResponse struct {
 	ErrorCode int    `json:"error_code"`
 }
 
+func (g GinServer) sendError(ctx gin.Context, status int, err error, errCode int) {
+	ctx.JSON(status, ErrorResponse{
+		Error:     err.Error(),
+		ErrorCode: errCode,
+	})
+}
+
 func (g GinServer) errorHandle(ctx gin.Context, err error) {
 	unwrapErr := errors.Unwrap(err)
 	if unwrapErr == nil {
@@ -21,64 +28,34 @@ func (g GinServer) errorHandle(ctx gin.Context, err error) {
 
 	switch unwrapErr {
 	case use_case.ErrorItemNotFound:
-		ctx.JSON(http.StatusNotFound, ErrorResponse{
-			Error:     err.Error(),
-			ErrorCode: 1,
-		})
+		g.sendError(ctx, http.StatusNotFound, err, 1)
 		break
 	case use_case.ErrorFirstNameIsRequire:
-		ctx.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:     err.Error(),
-			ErrorCode: 2,
-		})
+		g.sendError(ctx, http.StatusBadRequest, err, 2)
 		break
 	case use_case.ErrorLastNameIsRequire:
-		ctx.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:     err.Error(),
-			ErrorCode: 3,
-		})
+		g.sendError(ctx, http.StatusBadRequest, err, 3)
 		break
 	case use_case.ErrorPhoneIsRequire:
-		ctx.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:     err.Error(),
-			ErrorCode: 4,
-		})
+		g.sendError(ctx, http.StatusBadRequest, err, 4)
 		break
 	case use_case.ErrorEmailIsRequire:
-		ctx.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:     err.Error(),
-			ErrorCode: 5,
-		})
+		g.sendError(ctx, http.StatusBadRequest, err, 5)
 		break
 	case use_case.ErrorAddressIsRequire:
-		ctx.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:     err.Error(),
-			ErrorCode: 6,
-		})
+		g.sendError(ctx, http.StatusBadRequest, err, 6)
 		break
 	case use_case.ErrorDuplicatePhone:
-		ctx.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:     err.Error(),
-			ErrorCode: 7,
-		})
+		g.sendError(ctx, http.StatusBadRequest, err, 7)
 		break
 	case use_case.ErrorDuplicateEmail:
-		ctx.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:     err.Error(),
-			ErrorCode: 8,
-		})
+		g.sendError(ctx, http.StatusBadRequest, err, 8)
 		break
 	case use_case.ErrorDataTransform:
-		ctx.JSON(http.StatusBadRequest, ErrorResponse{
-			Error:     err.Error(),
-			ErrorCode: 9,
-		})
+		g.sendError(ctx, http.StatusBadRequest, err, 9)
 		break
 	default:
-		ctx.JSON(http.StatusInternalServerError, ErrorResponse{
-			Error:     err.Error(),
-			ErrorCode: 0,
-		})
+		g.sendError(ctx, http.StatusInternalServerError, err, 0)
 		break
 	}
 }
