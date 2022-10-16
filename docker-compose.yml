@@ -1,7 +1,13 @@
 version: '3.5'
 
+networks:
+  main:
+    name: main-network
+
 services:
   membership:
+    networks:
+      - main
     build: .
     container_name: Membership
     environment:
@@ -13,5 +19,6 @@ services:
       - POSTGRES_DATASOURCE_NAME=${POSTGRES_DATASOURCE_NAME}
     env_file:
       - ./.env
-      
+    ports:
+      - 80:80
       
