@@ -3,6 +3,7 @@ package member_repository
 import (
 	"database/sql"
 	"log"
+	"time"
 
 	"github.com/Waratep/membership/src/entity/member"
 	"github.com/Waratep/membership/src/use_case"
@@ -14,12 +15,14 @@ type postgresDB struct {
 }
 
 type memberPostgres struct {
-	ID        int    `bson:"id"`
-	FirstName string `bson:"first_name"`
-	LastName  string `bson:"last_name"`
-	Phone     string `bson:"phone"`
-	Email     string `bson:"email"`
-	Address   string `bson:"address"`
+	ID        int       `bson:"id"`
+	FirstName string    `bson:"first_name"`
+	LastName  string    `bson:"last_name"`
+	Phone     string    `bson:"phone"`
+	Email     string    `bson:"email"`
+	Address   string    `bson:"address"`
+	CreatedAt time.Time `bson:"created_at"`
+	UpdatedAt time.Time `bson:"updated_at"`
 }
 
 func NewPostgres(db *sql.Conn) use_case.MemberRepository {
@@ -48,12 +51,27 @@ func (m memberPostgres) toMemberUseCase() use_case.MembershipMember {
 			Phone:     m.Phone,
 			Email:     m.Email,
 			Address:   m.Address,
+			CreatedAt: m.CreatedAt,
+			UpdatedAt: m.UpdatedAt,
 		},
 	}
 }
 
 func (p postgresDB) CreateMember(ctx gin.Context, m member.Member) (use_case.MembershipMember, error) {
-	_, err := p.db.ExecContext(&ctx, "INSERT INTO members (first_name, last_name, phone, email, Address) VALUES ($1, $2, $3, $4, $5)", m.FirstName, m.LastName, m.Phone, m.Email, m.Address)
+	_, err := p.db.ExecContext(
+		&ctx,
+		`
+		INSERT INTO members 
+			(
+				first_name, 
+				last_name, 
+				phone, 
+				email, 
+				address,
+				created_at,
+				updated_at
+			) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+		m.FirstName, m.LastName, m.Phone, m.Email, m.Address, time.Now().UTC(), time.Now().UTC())
 	if err != nil {
 		log.Println("Error insert member", err)
 
@@ -85,7 +103,7 @@ func (p postgresDB) GetMemberByPhone(ctx gin.Context, phone string) (use_case.Me
 	var ms []memberPostgres
 	for rows.Next() {
 		var m memberPostgres
-		err := rows.Scan(&m.ID, &m.FirstName, &m.LastName, &m.Phone, &m.Email, &m.Phone)
+		err := rows.Scan(&m.ID, &m.FirstName, &m.LastName, &m.Phone, &m.Email, &m.Phone, &m.CreatedAt, &m.UpdatedAt)
 		if err != nil {
 			log.Println("Error parse member struct", err)
 
@@ -114,7 +132,7 @@ func (p postgresDB) GetMemberByEmail(ctx gin.Context, email string) (use_case.Me
 	var ms []memberPostgres
 	for rows.Next() {
 		var m memberPostgres
-		err := rows.Scan(&m.ID, &m.FirstName, &m.LastName, &m.Phone, &m.Email, &m.Phone)
+		err := rows.Scan(&m.ID, &m.FirstName, &m.LastName, &m.Phone, &m.Email, &m.Phone, &m.CreatedAt, &m.UpdatedAt)
 		if err != nil {
 			log.Println("Error parse member struct", err)
 
