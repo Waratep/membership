@@ -1,0 +1,17 @@
+version: '3.5'
+
+services:
+  membership:
+    build: .
+    container_name: Membership
+    environment:
+      - APP_NAME=${APP_NAME}
+      - APP_VERSION=${APP_VERSION}
+      - ENVIRONMENT=${ENVIRONMENT}
+      - PORT=${PORT}
+      - DEBUG=${DEBUG}
+      - POSTGRES_DATASOURCE_NAME=${POSTGRES_DATASOURCE_NAME}
+    env_file:
+      - ./.env
+      
+      

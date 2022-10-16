@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"os"
+	"strconv"
 	"sync"
 
 	"github.com/Waratep/membership/src/interface/gin_server"
@@ -19,7 +21,7 @@ type config struct {
 	AppName                string `env:"APP_NAME" envDefault:"membership"`
 	AppVersion             string `env:"APP_VERSION"`
 	Environment            string `env:"ENVIRONMENT" envDefault:"development"`
-	Port                   uint   `env:"PORT" envDefault:"80"`
+	Port                   int64  `env:"PORT" envDefault:"80"`
 	Debug                  bool   `env:"DEBUG" envDefault:"true"`
 	PostgresDatasourceName string `env:"POSTGRES_DATASOURCE_NAME"`
 }
@@ -37,17 +39,34 @@ func initEnvironment() config {
 	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
 
 	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file: %s\n", err)
+	if err == nil {
+		var cfg config
+		err = env.Parse(&cfg)
+		if err != nil {
+			log.Fatalf("Error parse env: %s\n", err)
+		}
+
+		return cfg
 	}
 
-	var cfg config
-	err = env.Parse(&cfg)
+	port, err := strconv.ParseInt(os.Getenv("PORT"), 10, 64)
 	if err != nil {
-		log.Fatalf("Error parse env: %s\n", err)
+		log.Fatalf("Error parse env `PORT`: %s\n", err)
 	}
 
-	return cfg
+	debug, err := strconv.ParseBool(os.Getenv("DEBUG"))
+	if err != nil {
+		log.Fatalf("Error parse env `DEBUG`: %s\n", err)
+	}
+
+	return config{
+		AppName:                os.Getenv("APP_NAME"),
+		AppVersion:             os.Getenv("APP_VERSION"),
+		Environment:            os.Getenv("ENVIRONMENT"),
+		Port:                   port,
+		Debug:                  debug,
+		PostgresDatasourceName: os.Getenv("POSTGRES_DATASOURCE_NAME"),
+	}
 }
 
 func initInterface(cfg config, useCase *use_case.UseCase) {
@@ -76,6 +95,9 @@ func initRepositories(cfg config) use_case.MemberRepository {
 	log.Println("Ping postgres database success")
 
 	conn, err := postgresDB.Conn(context.Background())
+	if err != nil {
+		log.Fatalln("Error connect postgres database", err)
+	}
 
 	defer postgresDB.Close()
 
