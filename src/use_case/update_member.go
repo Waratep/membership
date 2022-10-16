@@ -6,7 +6,7 @@ import (
 )
 
 func UpdateMember(ctx gin.Context, m member.Member) (int64, error) {
-	validateRequireFields(m)
+	// validateRequireFields(m)
 
 	return 0, nil
 }
