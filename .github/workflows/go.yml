@@ -38,4 +38,29 @@ jobs:
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: waratep/rmasanglui:latest
+        tags: waratep/rmasanglui:members-service-backend
+
+  deploy:
+    name: Deploy Service
+    runs-on: ubuntu-latest
+    needs: 
+      - build
+    env:
+      SSH_PRIVATE_KEY: ${ { secrets.EC2_SSH_KEY }}
+      REMOTE_HOST: ${ { secrets.EC2_HOST }}
+      REMOTE_USER: ${ { secrets.EC2_USERNAME }}
+      TARGET: ${ { secrets.TARGET_DIR }}
+    steps:
+      - 
+        name: Fetch Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Deploy to Server
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${ { secrets.EC2_SSH_KEY }}
+          REMOTE_HOST: ${ { secrets.EC2_HOST }}
+          REMOTE_USER: ${ { secrets.EC2_USERNAME }}
+          TARGET: ${ { secrets.TARGET_DIR }}
