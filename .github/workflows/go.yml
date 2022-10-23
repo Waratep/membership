@@ -64,3 +64,13 @@ jobs:
           REMOTE_HOST: ${{secrets.EC2_HOST}}
           REMOTE_USER: ${{secrets.EC2_USERNAME}}
           TARGET: ${{secrets.TARGET_DIR}}
+    
+      -
+        name: Docker-Compose Deploy
+        uses: alex-ac/github-action-ssh-docker-compose@master
+        with:
+          ssh_host: ${{ secrets.EC2_HOST }}
+          ssh_private_key: ${{ secrets.EC2_SSH_KEY }}
+          ssh_user: ${{ secrets.EC2_USERNAME }}
+          docker_compose_prefix: membership
+          docker_compose_filename: ./docker-compose.yaml
